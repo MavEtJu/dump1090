@@ -555,8 +555,8 @@ PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) 
         this.seen = receiver_timestamp - this.last_message_time;
         this.seen_pos = (this.last_position_time === null ? null : receiver_timestamp - this.last_position_time);
         
-	// If no packet in over 58 seconds, clear the plane.
-	if (this.seen > 58) {
+	// If no packet in over 58 seconds (via TimeHidePlane), clear the plane.
+	if (this.seen > TimeHidePlane) {
                 if (this.visible) {
                         //console.log("hiding " + this.icao);
                         this.clearMarker();
@@ -565,7 +565,7 @@ PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) 
                                 selectPlaneByHex(null,false);
                 }
 	} else {
-                if (this.position !== null && (this.selected || this.seen_pos < 60)) {
+                if (this.position !== null && (this.selected || this.seen_pos < TimeHidePlane)) {
 			this.visible = true;
 			if (this.updateTrack(receiver_timestamp, last_timestamp)) {
                                 this.updateLines();

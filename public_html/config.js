@@ -125,3 +125,9 @@ BingMapsAPIKey = null;
 // This is not polished yet (and so is disabled by default),
 // currently it's just a data dump of the new fields with no UX work.
 ExtendedData = false;
+
+// Time related
+// - If no packet in over 58 seconds, clear the plane.
+// - If a plane has not been seen for 300 seconds, consider it gone.
+TimeHidePlane = 60;
+TimeReaper = 300;

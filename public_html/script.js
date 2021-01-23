@@ -1015,7 +1015,7 @@ function reaper() {
         var newPlanes = [];
         for (var i = 0; i < PlanesOrdered.length; ++i) {
                 var plane = PlanesOrdered[i];
-                if (plane.seen > 300) {
+                if (plane.seen > TimeReaper) {
                         // Reap it.                                
                         plane.tr.parentNode.removeChild(plane.tr);
                         plane.tr = null;
@@ -1390,13 +1390,13 @@ function refreshTableInfo() {
     for (var i = 0; i < PlanesOrdered.length; ++i) {
 	var tableplane = PlanesOrdered[i];
     TrackedHistorySize += tableplane.history_size;
-	if (tableplane.seen >= 58 || tableplane.isFiltered()) {
+	if (tableplane.seen >= TimeHidePlane || tableplane.isFiltered()) {
         tableplane.tr.className = "plane_table_row hidden";
     } else {
         TrackedAircraft++;
         var classes = "plane_table_row";
 
-        if (tableplane.position !== null && tableplane.seen_pos < 60) {
+        if (tableplane.position !== null && tableplane.seen_pos < TimeHidePlane) {
             ++TrackedAircraftPositions;
 		}
 
