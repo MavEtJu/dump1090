@@ -101,6 +101,16 @@ function createBaseLayers() {
                 type: 'base',
         }));
 
+        world.push(new ol.layer.Tile({
+                source: new ol.source.OSM({
+                        "url" : "https://mt{0-3}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga",
+                        "attributions" : 'Courtesy of Google</a>',
+                }),
+                name: 'google_map',
+                title: 'Google Maps',
+                type: 'base',
+        }));
+
 
         if (BingMapsAPIKey) {
                 world.push(new ol.layer.Tile({
