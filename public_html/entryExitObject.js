@@ -1,15 +1,15 @@
 "use strict";
 
-function EdgeObject(lat, lon, alt) {
+function EntryExitObject(lat, lon, alt) {
 	this.lat = lat;
 	this.lon = lon;
 	this.alt = alt;
 }
 
-EdgeObject.prototype.draw = function() {
+EntryExitObject.prototype.draw = function() {
 	var position = [this.lon, this.lat];
 	var projHere = ol.proj.fromLonLat(position);
-	var color = this.getEdgeColor();
+	var color = this.getEntryExitColor();
 
 	var circleStyle = function(distance) {
 		return new ol.style.Style({
@@ -24,10 +24,10 @@ EdgeObject.prototype.draw = function() {
 	circle.transform('EPSG:4326', 'EPSG:3857');
 	var feature = new ol.Feature(circle);
 	feature.setStyle(circleStyle(distance));
-	EdgesFeatures.push(feature);
+	EntryExitsFeatures.push(feature);
 }
 
-EdgeObject.prototype.getEdgeColor = function() {
+EntryExitObject.prototype.getEntryExitColor = function() {
         var h, s, l;
 
         var colorArr = this.getAltitudeColor();
@@ -51,7 +51,7 @@ EdgeObject.prototype.getEdgeColor = function() {
         return 'hsl(' + (h/5).toFixed(0)*5 + ',' + (s/5).toFixed(0)*5 + '%,' + (l/5).toFixed(0)*5 + '%)'
 }
 
-EdgeObject.prototype.getAltitudeColor = function() {
+EntryExitObject.prototype.getAltitudeColor = function() {
         var h, s, l;
 
         if (this.alt === "ground") {

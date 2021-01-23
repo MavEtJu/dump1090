@@ -49,6 +49,13 @@ function PlaneObject(icao) {
         this.position_from_mlat = false
         this.sitedist  = null;
 
+	// Initial location
+	this.first_lat = null;
+	this.first_lon = null;
+	this.first_alt = null;
+	this.last_alt = null;
+	this.first_edge = false;
+
 	// Data packet numbers
 	this.messages  = null;
         this.rssi      = null;
@@ -495,6 +502,11 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                 this.position   = [data.lon, data.lat];
                 this.last_position_time = receiver_timestamp - data.seen_pos;
 
+		if (this.first_lat === null) {
+			this.first_lat = data.lat;
+			this.first_lon = data.lon;
+		}
+
                 if (SitePosition !== null) {
                         this.sitedist = ol.sphere.getDistance(SitePosition, this.position);
                 }
@@ -518,6 +530,12 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
         } else {
                 this.altitude = null;
         }
+	if (this.first_alt === null) {
+		this.first_alt = this.altitude;
+		this.last_alt = this.altitude;
+	}
+	if (this.altitude !== null)
+		this.last_alt = this.altitude;
 
         // Pick a selected altitude
         if ('nav_altitude_fms' in data) {
@@ -548,6 +566,16 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
         } else {
                 this.speed = null;
         }
+
+	if (this.first_edge == false &&
+	    this.first_lat !== null &&
+	    this.first_lon !== null &&
+	    this.first_alt !== null) {
+		this.first_edge = true;
+		var edge = new EntryExitObject(this.first_lat, this.first_lon, this.first_alt);
+		edge.draw();
+
+	}
 };
 
 PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) {

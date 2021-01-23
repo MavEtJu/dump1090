@@ -4,6 +4,7 @@
 // Define our global variables
 var OLMap         = null;
 var StaticFeatures = new ol.Collection();
+var EntryExitsFeatures = new ol.Collection();
 var SiteCircleFeatures = new ol.Collection();
 var PlaneIconFeatures = new ol.Collection();
 var PlaneTrailFeatures = new ol.Collection();
@@ -157,6 +158,23 @@ function processReceiverUpdate(data) {
 		// Call the function update
 		plane.updateData(now, ac);
 	}
+}
+
+function fetchEntryExits() {
+	var FetchEntryExits = $.ajax({ url: 'data/edges.json',
+                              timeout: 5000,
+                              cache: false,
+                              dataType: 'json' });
+        FetchEntryExits.done(function(data) {
+		var edges = data.edges;
+
+		console.log("Number of edges:" + edges.length);
+		for (var j = 0; j < edges.length; j++) {
+			var edge = new EntryExitObject(data.edges[j].lat, data.edges[j].lon, data.edges[j].alt);
+			edge.draw();
+		}
+
+	});
 }
 
 function fetchData() {
@@ -515,6 +533,7 @@ function end_load_history() {
         window.setInterval(reaper, 60000);
 
         // And kick off one refresh immediately.
+//	fetchEntryExits();
         fetchData();
 
         // update the display layout from any URL query strings
@@ -614,6 +633,9 @@ function applyUrlQueryStrings() {
     if (params.get('rangeRings')) {
         setRangeRingVisibility(params.get('rangeRings'));
     }
+    if (params.get('entriesExits')) {
+        setEntryExitsVisibility(params.get('entriesExits'));
+    }
     if (params.get('ringCount')) {
         setRingCount(params.get('ringCount'));
     }
@@ -700,6 +722,15 @@ function initialize_map() {
         layers.push(new ol.layer.Group({
                 title: 'Overlays',
                 layers: [
+                        new ol.layer.Vector({
+                                name: 'edges',
+                                type: 'overlay',
+                                title: 'Entries and Exits',
+                                source: new ol.source.Vector({
+                                        features: EntryExitsFeatures,
+                                })
+                        }),
+
                         new ol.layer.Vector({
                                 name: 'site_pos',
                                 type: 'overlay',
@@ -864,6 +895,7 @@ function initialize_map() {
 	OLMap.once('postrender', function(e) {
 		toggleLayer('#nexrad_checkbox', 'nexrad');
 		toggleLayer('#sitepos_checkbox', 'site_pos');
+		toggleLayer('#edges_checkbox', 'edges');
 		toggleLayer('#actrail_checkbox', 'ac_trail');
 		toggleLayer('#acpositions_checkbox', 'ac_positions');
 	});
@@ -1009,13 +1041,20 @@ function createSiteCircleFeatures() {
 
 // This looks for planes to reap out of the master Planes variable
 function reaper() {
-        //console.log("Reaping started..");
+        console.log("Reaping started..");
 
         // Look for planes where we have seen no messages for >300 seconds
         var newPlanes = [];
         for (var i = 0; i < PlanesOrdered.length; ++i) {
                 var plane = PlanesOrdered[i];
                 if (plane.seen > TimeReaper) {
+			// Save exit point
+			if (plane.position !== null &&
+			    plane.last_alt !== null) {
+				var edge = new EntryExitObject(plane.position[1], plane.position[0], plane.last_alt);
+				edge.draw();
+			}
+
                         // Reap it.                                
                         plane.tr.parentNode.removeChild(plane.tr);
                         plane.tr = null;
@@ -2229,6 +2268,27 @@ function setDisplayUnits(units) {
         localStorage['displayUnits'] = "imperial";
     }
     onDisplayUnitsChanged();
+}
+
+// Function to set range ring visibility
+function setEntryExitVisibility (showhide) {
+   var show = null;
+
+   if (showhide === 'hide') {
+        $('#entryExit_checkbox').removeClass('settingsCheckboxChecked')
+        show = false;
+   } else if (showhide === 'show') {
+        $('#entryExit_checkbox').addClass('settingsCheckboxChecked')
+        show = true;
+   } else {
+        return
+   }
+
+   ol.control.LayerSwitcher.forEachRecursive(layerGroup, function(lyr) {
+        if (lyr.get('name') === 'entryExits') {
+        lyr.setVisible(show);
+        }
+    });
 }
 
 // Function to set range ring visibility
