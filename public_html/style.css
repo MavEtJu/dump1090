@@ -539,6 +539,14 @@ select.error, textarea.error, input.error {
 }
 
 .settingsContainer {
+    padding-right: 18px;
+    padding-left: 2px;
+    margin-top: 18px;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.downloadContainer {
     padding-right: 60px;
     padding-left: 2px;
     margin-top: 18px;
@@ -687,6 +695,19 @@ select.error, textarea.error, input.error {
     padding-left: 5px;
 }
 
+#download_infoblock {
+    position: absolute;
+    right: 1px;
+    top: 60px;
+    width: 398px;
+    min-height: 180px;
+    background: #ffffff;
+    box-shadow: 4px 4px 10px #444444;
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+}
+
 #settings_infoblock {
     position: absolute;
     right: 1px;
@@ -724,6 +745,17 @@ select.error, textarea.error, input.error {
 }
 
 .settingsCloseBox {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    background-image: url('images/close-settings.png');
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.downloadCloseBox {
     position: absolute;
     right: 8px;
     top: 8px;

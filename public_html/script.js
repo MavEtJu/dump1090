@@ -8,6 +8,7 @@ var EntryExitsFeatures = new ol.Collection();
 var SiteCircleFeatures = new ol.Collection();
 var PlaneIconFeatures = new ol.Collection();
 var PlaneTrailFeatures = new ol.Collection();
+var EntryExitsList = []
 var Planes        = {};
 var PlanesOrdered = [];
 var PlaneFilter   = {};
@@ -158,23 +159,6 @@ function processReceiverUpdate(data) {
 		// Call the function update
 		plane.updateData(now, ac);
 	}
-}
-
-function fetchEntryExits() {
-	var FetchEntryExits = $.ajax({ url: 'data/edges.json',
-                              timeout: 5000,
-                              cache: false,
-                              dataType: 'json' });
-        FetchEntryExits.done(function(data) {
-		var edges = data.edges;
-
-		console.log("Number of edges:" + edges.length);
-		for (var j = 0; j < edges.length; j++) {
-			var edge = new EntryExitObject(data.edges[j].lat, data.edges[j].lon, data.edges[j].alt);
-			edge.draw();
-		}
-
-	});
 }
 
 function fetchData() {
@@ -344,6 +328,9 @@ function initialize() {
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
         });
+        $('#downloadCog').on('click', function() {
+        	$('#download_infoblock').toggle();
+        });
 
         $('#column_select').on('click', function() {
                 $('#column_select_window').toggle();
@@ -355,6 +342,9 @@ function initialize() {
 
         $('#settings_close').on('click', function() {
             $('#settings_infoblock').hide();
+        });
+        $('#download_close').on('click', function() {
+            $('#download_infoblock').hide();
         });
 
         $('#groundvehicle_filter').on('click', function() {
@@ -723,7 +713,7 @@ function initialize_map() {
                 title: 'Overlays',
                 layers: [
                         new ol.layer.Vector({
-                                name: 'edges',
+                                name: 'entriesExits',
                                 type: 'overlay',
                                 title: 'Entries and Exits',
                                 source: new ol.source.Vector({
@@ -895,7 +885,7 @@ function initialize_map() {
 	OLMap.once('postrender', function(e) {
 		toggleLayer('#nexrad_checkbox', 'nexrad');
 		toggleLayer('#sitepos_checkbox', 'site_pos');
-		toggleLayer('#edges_checkbox', 'edges');
+		toggleLayer('#entryexits_checkbox', 'entriesExits');
 		toggleLayer('#actrail_checkbox', 'ac_trail');
 		toggleLayer('#acpositions_checkbox', 'ac_positions');
 	});
@@ -1052,6 +1042,7 @@ function reaper() {
 			if (plane.position !== null &&
 			    plane.last_alt !== null) {
 				var edge = new EntryExitObject(plane.position[1], plane.position[0], plane.last_alt);
+				EntryExitsList.push(edge);
 				edge.draw();
 			}
 
@@ -2417,3 +2408,82 @@ function toggleAllColumns(switchToggle) {
 
         localStorage.setItem('selectAllColumnsCheckbox', selectAllColumnsCheckbox);
 }
+
+function download(filename, text, type) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:' + type + ';charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+
+	element.style.display = 'none';
+	document.body.appendChild(element);
+
+	element.click();
+
+	document.body.removeChild(element);
+}
+
+Date.prototype.yyyymmdd = function() {
+	var mm = this.getMonth() + 1; // getMonth() is zero-based
+	var dd = this.getDate();
+
+	return [this.getFullYear(),
+		(mm>9 ? '' : '0') + mm,
+		(dd>9 ? '' : '0') + dd
+		].join('');
+};
+
+Date.prototype.hhmmss = function() {
+	var hh = this.getHours();
+	var mm = this.getMinutes();
+	var ss = this.getSeconds();
+
+	return [(hh>9 ? '' : '0') + hh,
+		(mm>9 ? '' : '0') + mm,
+		(ss>9 ? '' : '0') + ss
+		].join('');
+};
+
+function downloadEntryExitPoints() {
+	var d = new Date();
+	var filename = "entry-exit-points-" + d.yyyymmdd() + "-" + d.hhmmss() + ".json";
+	var s = "{ \"points\": [\n";
+	for (var i = 0; i < EntryExitsList.length; i++) {
+		var ee = EntryExitsList[i];
+		s += "{ \"lat\": " + ee.lat + ", \"lon\": " + ee.lon + ", \"alt\": " + ee.alt + " },\n";
+	};
+	s += "{ \"lat\": 0, \"lon\": 0, \"alt\": 0 }\n";
+	s += "]}\n";
+
+	download(filename, s, "application/json");
+}
+
+function uploadEntryExitPoints() {
+	var content = document.getElementById('contentFile');
+	try {
+		let files = content.files;
+		if (!files.length) {
+			alert('No file selected!');
+			return;
+		}
+		let file = files[0];
+		let reader = new FileReader();
+		const self = this;
+		reader.onload = (event) => {
+			var json = JSON.parse(event.target.result);
+			var ees = json.points;
+
+			console.log("Number of entry/exits:" + ees.length);
+			for (var j = 0; j < ees.length; j++) {
+				if (json.points[j].lat == 0 && json.points[j].lon == 0)
+					continue;
+				var ee = new EntryExitObject(json.points[j].lat, json.points[j].lon, json.points[j].alt);
+				EntryExitsList.push(ee);
+				ee.draw();
+			}
+		};
+		reader.readAsText(file);
+	} catch (err) {
+		console.error(err);
+	}
+}
+

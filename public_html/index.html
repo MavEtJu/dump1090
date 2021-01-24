@@ -60,6 +60,7 @@
 				<div class="button buttonHeader" onclick="deselectAllPlanes();"><span class="buttonText">Hide All Tracks</span></div>
 			</div>
 			<div class="settingsContainer"><img src="images/settings-icon.png" id="settingsCog" srcset="images/settings-icon.png 1x, images/settings-icon@2x.png 2x, images/settings-icon@3x.png 3x"></div>
+			<div class="downloadContainer"><img src="images/download-icon.png" id="downloadCog"></div>
 		</div>
 
 		<div id="layout_container">
@@ -95,6 +96,22 @@
 				</div>
 			</div>
 
+			<div id="download_infoblock">
+				<div id="download_close" class="downloadCloseBox"></div>
+
+				<div>
+					<div id="download_entryexits">Entry and Exits points </div>
+					<ul>
+						<li>
+							<span id="download_entryexits" onClick="downloadEntryExitPoints()">download</span>
+						</li>
+						<li>
+							<input id="contentFile" type="file" accept="application/json" /></span>
+							<span id="upload_entryexits" onClick="uploadEntryExitPoints()">upload</span>
+						</li>
+					</ul>
+				</div>
+			</div>
 			<div id="settings_infoblock">
 				<div id="settings_close" class="settingsCloseBox"></div>
 				<div id="units_container">
@@ -114,7 +131,7 @@
 						<div class="settingsText">NEXRAD Weather</div>
 					</div>
 					<div class="settingsOptionContainer">
-						<div class="settingsCheckbox" id="edges_checkbox"></div>
+						<div class="settingsCheckbox" id="entryexits_checkbox"></div>
 						<div class="settingsText">Entries and Exits</div>
 					</div>
 					<div class="settingsOptionContainer">

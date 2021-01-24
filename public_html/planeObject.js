@@ -54,7 +54,7 @@ function PlaneObject(icao) {
 	this.first_lon = null;
 	this.first_alt = null;
 	this.last_alt = null;
-	this.first_edge = false;
+	this.first_entryexit = false;
 
 	// Data packet numbers
 	this.messages  = null;
@@ -567,13 +567,14 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                 this.speed = null;
         }
 
-	if (this.first_edge == false &&
+	if (this.first_entryexit == false &&
 	    this.first_lat !== null &&
 	    this.first_lon !== null &&
 	    this.first_alt !== null) {
-		this.first_edge = true;
-		var edge = new EntryExitObject(this.first_lat, this.first_lon, this.first_alt);
-		edge.draw();
+		this.first_entryexit = true;
+		var ee = new EntryExitObject(this.first_lat, this.first_lon, this.first_alt);
+		ee.draw();
+		EntryExitsList.push(ee);
 
 	}
 };
