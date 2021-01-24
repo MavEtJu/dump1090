@@ -2446,10 +2446,13 @@ Date.prototype.hhmmss = function() {
 function downloadEntryExitPoints() {
 	var d = new Date();
 	var filename = "entry-exit-points-" + d.yyyymmdd() + "-" + d.hhmmss() + ".json";
-	var s = "{ \"points\": [\n";
+	var s = "{";
+	s += "\"date\": \"" + d.yyyymmdd() + "\",\n";
+	s += "\"time\": \"" + d.hhmmss() + "\",\n";
+	s += "\"points\": [\n";
 	for (var i = 0; i < EntryExitsList.length; i++) {
 		var ee = EntryExitsList[i];
-		s += "{ \"lat\": " + ee.lat + ", \"lon\": " + ee.lon + ", \"alt\": " + ee.alt + " },\n";
+		s += "{ \"lat\": " + ee.lat + ", \"lon\": " + ee.lon + ", \"alt\": \"" + ee.alt + "\" },\n";
 	};
 	s += "{ \"lat\": 0, \"lon\": 0, \"alt\": 0 }\n";
 	s += "]}\n";
